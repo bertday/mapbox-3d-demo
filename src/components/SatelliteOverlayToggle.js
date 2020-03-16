@@ -21,7 +21,17 @@ class SatelliteOverlayToggle extends React.Component {
     it via the mapboxgl.Map.addControl api.
   */
 
-  // TODO background color on active
+  constructor(props) {
+    super(props);
+
+    // set initial state
+    this.state = {
+      // TODO this should be consolidated with App.shouldShowSatelliteOverlay so
+      // there's a single source of truth for whether to show the satellite
+      // layer. a global state store like redux might be a good solution.
+      active: false,
+    };
+  }
 
   componentDidMount() {
     this.props.didMount(this);
@@ -37,10 +47,21 @@ class SatelliteOverlayToggle extends React.Component {
     return;
   }
 
+  handleClick(e) {
+    this.setState({
+      active: !this.state.active,
+    });
+
+    // pass event up to the parent to add/remove the layer
+    this.props.handleClick();
+  }
+
   render () {
+    const { active } = this.state;
+
     return (
-      <div className="mapboxgl-ctrl mapboxgl-ctrl-group SatelliteOverlayToggle">
-        <button onClick={this.props.handleClick}>
+      <div className={`mapboxgl-ctrl mapboxgl-ctrl-group ${active ? 'SatelliteOverlayToggle--active' : ''}`}>
+        <button onClick={this.handleClick.bind(this)}>
           <i className="fas fa-globe"></i>
         </button>
       </div>

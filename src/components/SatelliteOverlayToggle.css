@@ -1,3 +1,4 @@
-.SatelliteOverlayToggle {
-  /* background: #aaa; */
+.SatelliteOverlayToggle--active {
+  background: rgb(126,235,255);
+  background: linear-gradient(90deg, rgba(126,235,255,1) 0%, rgba(127,255,194,1) 100%);
 }
