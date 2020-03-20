@@ -11,6 +11,8 @@ class Map extends React.Component {
   constructor(props) {
     super(props);
 
+    this.map = undefined;
+
     // set initial state
     this.state = {
       shouldShowSatelliteOverlay: false,
@@ -32,54 +34,7 @@ class Map extends React.Component {
 
     this.map = map;
 
-    // init layer manager
-    const layerManager = new LayerManager(map);
-
-    // wait for map style to load
-    map.on('load', () => {
-      // remove labels
-      map.style.stylesheet.layers.forEach((layer) => {
-        if (layer.type === 'symbol') {
-          map.removeLayer(layer.id);
-        }
-      });
-
-      // add aon center
-      // source: https://www.turbosquid.com/3d-models/simply-city-street-3ds-free/337573
-      const aonCenterLayer = layerManager.getCustomObjLayer({
-        id: 'aon-center',
-        filePath: process.env.PUBLIC_URL + '/aon-center.obj',
-        origin: [-87.6215000, 41.8852500],
-        scale: 0.537,
-      });
-      map.addLayer(aonCenterLayer);
-
-      // add mapbox buildings
-      const mapboxBuildingsLayer = layerManager.getMapboxBuildingsLayer();
-      map.addLayer(mapboxBuildingsLayer);
-
-      // add navigation control
-      map.addControl(new mapboxgl.NavigationControl());
-
-      // add satellite overlay toggle
-      // see SatelliteOverlayToggle.js for notes on how this works with the dom
-      ReactDom.render(
-        <SatelliteOverlayToggle
-          didMount={this.satelliteOverlayToggleDidMount.bind(this)}
-          handleClick={this.didToggleSatelliteOverlay.bind(this)}
-        />,
-        document.getElementById('satellite-overlay-toggle')
-      )
-
-      // add satellite source
-      map.addSource(
-        'satellite',
-        {
-          type: 'raster',
-          url: 'mapbox://mapbox.satellite',
-        }
-      );
-    });
+    map.on('load', this.mapDidLoad.bind(this));
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -107,6 +62,56 @@ class Map extends React.Component {
 
   render() {
     return <div ref={el => this.mapContainer = el} className="mapContainer" />;
+  }
+
+  mapDidLoad() {
+    const { map } = this;
+
+    // init layer manager
+    const layerManager = new LayerManager(map);
+
+    // remove labels
+    map.style.stylesheet.layers.forEach((layer) => {
+      if (layer.type === 'symbol') {
+        map.removeLayer(layer.id);
+      }
+    });
+
+    // add aon center
+    // source: https://www.turbosquid.com/3d-models/simply-city-street-3ds-free/337573
+    const aonCenterLayer = layerManager.getCustomObjLayer({
+      id: 'aon-center',
+      filePath: process.env.PUBLIC_URL + '/aon-center.obj',
+      origin: [-87.6215000, 41.8852500],
+      scale: 0.537,
+    });
+    map.addLayer(aonCenterLayer);
+
+    // add mapbox buildings
+    const mapboxBuildingsLayer = layerManager.getMapboxBuildingsLayer();
+    map.addLayer(mapboxBuildingsLayer);
+
+    // add navigation control
+    map.addControl(new mapboxgl.NavigationControl());
+
+    // add satellite overlay toggle
+    // see SatelliteOverlayToggle.js for notes on how this works with the dom
+    ReactDom.render(
+      <SatelliteOverlayToggle
+        didMount={this.satelliteOverlayToggleDidMount.bind(this)}
+        handleClick={this.didToggleSatelliteOverlay.bind(this)}
+      />,
+      document.getElementById('satellite-overlay-toggle')
+    )
+
+    // add satellite source
+    map.addSource(
+      'satellite',
+      {
+        type: 'raster',
+        url: 'mapbox://mapbox.satellite',
+      }
+    );
   }
 
   satelliteOverlayToggleDidMount(comp) {
