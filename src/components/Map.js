@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import mapboxgl from 'mapbox-gl';
 import LayerManager from '../layer-manager';
+import Marker from './Marker';
 import SatelliteOverlayToggle from './SatelliteOverlayToggle';
 import './Map.css';
 
@@ -34,7 +35,11 @@ class Map extends React.Component {
 
     this.map = map;
 
+    // set up map on load
     map.on('load', this.mapDidLoad.bind(this));
+
+    // listen for map clicks
+    map.on('click', this.handleMapClick.bind(this));
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -61,7 +66,13 @@ class Map extends React.Component {
   }
 
   render() {
-    return <div ref={el => this.mapContainer = el} className="mapContainer" />;
+    return (
+      <div ref={el => this.mapContainer = el} className="mapContainer">
+        {this.state.userPoints.map((userPoint) => {
+          return <Marker lngLat={userPoint.lngLat} map={this.map} />;
+        })}
+      </div>
+    );
   }
 
   mapDidLoad() {
@@ -122,6 +133,18 @@ class Map extends React.Component {
     this.setState({
       shouldShowSatelliteOverlay: !this.state.shouldShowSatelliteOverlay,
     });
+  }
+
+  handleMapClick(e) {
+    const { lng, lat } = e.lngLat
+
+    const userPoints  = [...this.state.userPoints];
+    const userPoint = {
+      lngLat: { lng, lat },
+    };
+    userPoints.push(userPoint);
+
+    this.setState({ userPoints });
   }
 }
 
