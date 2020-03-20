@@ -16,7 +16,7 @@ class Map extends React.Component {
     // set initial state
     this.state = {
       shouldShowSatelliteOverlay: false,
-      markers: [],
+      userPoints: [],
     };
   }
 
