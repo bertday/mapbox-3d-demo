@@ -109,7 +109,7 @@ class App extends React.Component {
       <div>
         <header>
           <img src="aon-logo.svg" className="logo" alt="AON" />
-          <span className="centered">Center</span>
+          <span className="center">Center</span>
         </header>
         <div ref={el => this.mapContainer = el} className="mapContainer" />
       </div>
