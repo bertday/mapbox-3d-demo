@@ -41,7 +41,6 @@ class EditableLabel extends React.Component {
         <input
           className="editable-label-input"
           defaultValue={this.state.value}
-          onChange={this.handleChange.bind(this)}
           onBlur={this.handleDidStopEditing.bind(this)}
         />
       );
@@ -72,10 +71,7 @@ class EditableLabel extends React.Component {
     this.setState({ isEditing: true });
   }
 
-  handleChange(e) {
-    const nextValue = e.target.value;
 
-    this.setState({ value: nextValue });
   }
 
   handleDidStopEditing(e) {
