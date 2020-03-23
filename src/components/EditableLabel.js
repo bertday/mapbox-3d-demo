@@ -42,6 +42,7 @@ class EditableLabel extends React.Component {
           className="editable-label-input"
           defaultValue={this.state.value}
           onBlur={this.handleDidStopEditing.bind(this)}
+          onKeyPress={this.handleKeyPress}
         />
       );
     }
@@ -71,7 +72,13 @@ class EditableLabel extends React.Component {
     this.setState({ isEditing: true });
   }
 
+  handleKeyPress(e) {
+    // listen for enter key to stop editing
+    const isEnter = e.nativeEvent.keyCode === 13;
 
+    if (isEnter) {
+      e.target.blur();
+    }
   }
 
   handleDidStopEditing(e) {
