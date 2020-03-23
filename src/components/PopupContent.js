@@ -1,6 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import {
+  updateUserPointLngLat,
+  fetchWeatherForUserPoint,
+} from '../actions';
 import EditableLabel from './EditableLabel';
 import './PopupContent.css';
 
@@ -81,17 +85,15 @@ class PopupContent extends React.Component {
   }
 
   handleLngOrLatUpdate(nextCoordStr, latOrLng) {
+    const { userPointId } = this.props;
     // cast next coord string (from text input) to a float
     const nextCoord = parseFloat(nextCoordStr);
-
     const prevLngLat = this.getLngLat();
     const nextLngLat = { ...prevLngLat };
     nextLngLat[latOrLng] = nextCoord;
 
-    this.props.handleLngLatUpdate(
-      this.props.userPointId,
-      nextLngLat,
-    )
+    this.props.dispatch(updateUserPointLngLat(userPointId, nextLngLat));
+    this.props.dispatch(fetchWeatherForUserPoint(userPointId));
   }
 
   getWeatherText() {
