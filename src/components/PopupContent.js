@@ -40,7 +40,7 @@ class PopupContent extends React.Component {
               value={this.getLngLat().lat}
               validator={this.validateCoordinate}
               onUpdate={(nextCoord) => {
-                this.handlLngOrLatUpdate(nextCoord, 'lat');
+                this.handleLngOrLatUpdate(nextCoord, 'lat');
               }}
               errorMessage="Please check the latitude you entered and try again."
             />
@@ -52,7 +52,7 @@ class PopupContent extends React.Component {
               value={this.getLngLat().lng}
               validator={this.validateCoordinate}
               onUpdate={(nextCoord) => {
-                this.handlLngOrLatUpdate(nextCoord, 'lng');
+                this.handleLngOrLatUpdate(nextCoord, 'lng');
               }}
               errorMessage="Please check the longitude you entered and try again."
             />
@@ -80,7 +80,7 @@ class PopupContent extends React.Component {
     return !/^\s*$/.test(coorindate) && !isNaN(coorindate);
   }
 
-  handlLngOrLatUpdate(nextCoordStr, latOrLng) {
+  handleLngOrLatUpdate(nextCoordStr, latOrLng) {
     // cast next coord string (from text input) to a float
     const nextCoord = parseFloat(nextCoordStr);
 
