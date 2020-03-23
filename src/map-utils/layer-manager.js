@@ -1,6 +1,6 @@
 import * as three from 'three';
 import mapboxgl from 'mapbox-gl';
-import ThreeObjLoader from './util/ThreeObjLoader';
+import ThreeObjLoader from './ThreeObjLoader';
 
 class LayerManager {
   getMapboxBuildingsLayer() {
