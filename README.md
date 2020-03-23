@@ -2,7 +2,7 @@
 
 This project demonstrates how to use Mapbox GL to render a 3D model representing AON Center in Downtown Chicago.
 
-![Mapbox 3D Demo Screenshot](https://i.imgur.com/v8i2715.png)
+![Mapbox 3D Demo Screenshot](/SCREENSHOT.png?raw=true)
 
 It uses:
 
