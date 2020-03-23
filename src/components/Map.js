@@ -1,24 +1,26 @@
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
+import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
-import LayerManager from '../layer-manager';
+import store from '../store';
+import {
+  addUserPoint,
+  toggleSatelliteOverlay,
+} from '../actions';
+import LayerManager from '../map-utils/layer-manager';
 import Marker from './Marker';
 import SatelliteOverlayToggle from './SatelliteOverlayToggle';
 import './Map.css';
 
+// REVIEW may want to obfuscate this somehow. see note about weather api token
+// in PopupContent.js
 mapboxgl.accessToken = 'pk.eyJ1IjoicGFuYmFsYW5nYSIsImEiOiJjam55MXU0aWMxNzN5M3Byd2NmYzR3Y24wIn0.0HbKIGeEpiDqh4ezOQOw-Q';
 
 class Map extends React.Component {
   constructor(props) {
     super(props);
 
-    this.map = undefined;
-
-    // set initial state
-    this.state = {
-      shouldShowSatelliteOverlay: false,
-      userPoints: [],
-    };
+    this._map = undefined;
   }
 
   componentDidMount() {
@@ -33,24 +35,21 @@ class Map extends React.Component {
       antialias: true,
     });
 
-    this.map = map;
+    this._map = map;
 
-    // set up map on load
     map.on('load', this.mapDidLoad.bind(this));
-
-    // listen for map clicks
     map.on('click', this.handleMapClick.bind(this));
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (!this.state.shouldShowSatelliteOverlay) {
-      if (nextState.shouldShowSatelliteOverlay) {
+  componentDidUpdate(prevProps) {
+    if (this.props.shouldShowSatelliteOverlay === true) {
+      if (prevProps.shouldShowSatelliteOverlay === false) {
         // add satellite overlay
         // TODO this could go into the LayerManager, but it's fairly simple so
         // leaving it here for now.
         // also this might be an improvement:
         // https://docs.mapbox.com/mapbox-gl-js/example/toggle-layers/
-        this.map.addLayer(
+        this._map.addLayer(
           {
             id: 'satellite',
             source: 'satellite',
@@ -59,24 +58,12 @@ class Map extends React.Component {
           'aon-center'
         );
       }
-    } else if (!nextState.shouldShowSatelliteOverlay) {
-      // remove satellite overlay
-      this.map.removeLayer('satellite');
+    } else if (prevProps.shouldShowSatelliteOverlay === true) {
+      this._map.removeLayer('satellite');
     }
   }
-
-  render() {
-    return (
-      <div ref={el => this.mapContainer = el} className="mapContainer">
-        {this.state.userPoints.map((userPoint) => {
-          return <Marker lngLat={userPoint.lngLat} map={this.map} />;
-        })}
-      </div>
-    );
-  }
-
   mapDidLoad() {
-    const { map } = this;
+    const map = this._map;
 
     // init layer manager
     const layerManager = new LayerManager(map);
@@ -107,10 +94,11 @@ class Map extends React.Component {
 
     // add satellite overlay toggle
     // see SatelliteOverlayToggle.js for notes on how this works with the dom
-    ReactDom.render(
+    ReactDOM.render(
       <SatelliteOverlayToggle
         didMount={this.satelliteOverlayToggleDidMount.bind(this)}
         handleClick={this.didToggleSatelliteOverlay.bind(this)}
+        store={store}
       />,
       document.getElementById('satellite-overlay-toggle')
     )
@@ -126,26 +114,60 @@ class Map extends React.Component {
   }
 
   satelliteOverlayToggleDidMount(comp) {
-    this.map.addControl(comp);
+    this._map.addControl(comp);
+  }
+
+  render() {
+    return (
+      <div ref={el => this.mapContainer = el} className="mapContainer">
+        {this.getUserPoints().map((userPoint) => {
+          return <Marker userPointId={userPoint.id}
+                         key={userPoint.id}
+                         map={this}
+                 />;
+        })}
+      </div>
+    );
+  }
+
+  getUserPoints() {
+    return Object.values(this.props.userPoints);
   }
 
   didToggleSatelliteOverlay() {
-    this.setState({
-      shouldShowSatelliteOverlay: !this.state.shouldShowSatelliteOverlay,
-    });
+    this.props.dispatch(toggleSatelliteOverlay());
   }
 
   handleMapClick(e) {
-    const { lng, lat } = e.lngLat
+    /*
+    ignore marker click events
 
-    const userPoints  = [...this.state.userPoints];
-    const userPoint = {
-      lngLat: { lng, lat },
-    };
-    userPoints.push(userPoint);
+    problem: clicking on a map marker fires a map click event before the marker
+    click event, which means a new marker gets created each time. because the
+    map event comes first, we can't use event.stopPropagation() to prevent the
+    duplicate event.
 
-    this.setState({ userPoints });
+    solution: this checks map click events to see if the target is a marker, and
+    ignores them. this isn't ideal, so...
+
+    TODO: find out why the map click event fires first. maybe a side effect of
+    using react + mapboxgl?
+    */
+
+    const isMarkerClick = e.originalEvent.target.classList.contains('marker');
+    if (isMarkerClick) return;
+
+    // the mapbox lnglat has extra stuff we don't need. paring it down here.
+    const { lng, lat } = e.lngLat;
+    const lngLat = { lng, lat};
+
+    this.props.dispatch(addUserPoint(lngLat));
   }
 }
 
-export default Map;
+const mapStateToProps = (state) => ({
+  userPoints: state.userPoints,
+  shouldShowSatelliteOverlay: state.shouldShowSatelliteOverlay,
+});
+
+export default connect(mapStateToProps)(Map);

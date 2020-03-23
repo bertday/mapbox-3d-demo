@@ -1,5 +1,6 @@
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
+import { connect } from 'react-redux';
 import './SatelliteOverlayToggle.css';
 
 class SatelliteOverlayToggle extends React.Component {
@@ -21,24 +22,12 @@ class SatelliteOverlayToggle extends React.Component {
     it via the mapboxgl.Map.addControl api.
   */
 
-  constructor(props) {
-    super(props);
-
-    // set initial state
-    this.state = {
-      // TODO this should be consolidated with App.shouldShowSatelliteOverlay so
-      // there's a single source of truth for whether to show the satellite
-      // layer. a global state store like redux might be a good solution.
-      active: false,
-    };
-  }
-
   componentDidMount() {
     this.props.didMount(this);
   }
 
   onAdd(map) {
-    return ReactDom.findDOMNode(this);
+    return ReactDOM.findDOMNode(this);
   }
 
   onRemove(map) {
@@ -48,19 +37,19 @@ class SatelliteOverlayToggle extends React.Component {
   }
 
   handleClick(e) {
-    this.setState({
-      active: !this.state.active,
-    });
-
     // pass event up to the parent to add/remove the layer
     this.props.handleClick();
   }
 
   render () {
-    const { active } = this.state;
+    let className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+
+    if (this.props.shouldShowSatelliteOverlay) {
+      className += ' SatelliteOverlayToggle--active'
+    }
 
     return (
-      <div className={`mapboxgl-ctrl mapboxgl-ctrl-group ${active ? 'SatelliteOverlayToggle--active' : ''}`}>
+      <div className={className}>
         <button onClick={this.handleClick.bind(this)}>
           <i className="fas fa-globe"></i>
         </button>
@@ -69,4 +58,8 @@ class SatelliteOverlayToggle extends React.Component {
   }
 }
 
-export default SatelliteOverlayToggle;
+const mapStateToProps = (state) => ({
+  shouldShowSatelliteOverlay: state.shouldShowSatelliteOverlay,
+});
+
+export default connect(mapStateToProps)(SatelliteOverlayToggle);

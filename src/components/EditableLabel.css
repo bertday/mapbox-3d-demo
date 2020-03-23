@@ -1,0 +1,9 @@
+/* defaults. these can be overridden by the consuming app/component. */
+
+.editable-label-error {
+  color: red;
+}
+
+.editable-label-input {
+  width: 100%;
+}
