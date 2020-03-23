@@ -34,7 +34,7 @@ class PopupContent extends React.Component {
         <section>
           <h1>Location</h1>
           <p className="help-text">
-            To edit latitude or longitude, click on the text and start typing. Hit Enter ↵ when you're
+            To edit coordinates, drag the marker on the map or click the text below and start typing. Hit Enter ↵ when you're
             done.
           </p>
 
